@@ -1,0 +1,3 @@
+{"version":"0.2.0","configurations":[
+{"name":"CareLoop API","type":"debugpy","request":"launch","module":"uvicorn","args":["backend.app:app","--reload","--port","8000"],"cwd":"${workspaceFolder}"},
+{"name":"Train models","type":"debugpy","request":"launch","module":"ml.train","cwd":"${workspaceFolder}"}]}

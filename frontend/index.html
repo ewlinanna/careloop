@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CareLoop · 30-day readmission risk</title>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--tx:#0f1b27;--mu:#5b6b7b;--bd:#e0e7ee;--ac:#0e7490;--ac2:#14b8a6;--g:#15803d;--gb:#dcfce7;--a:#a15c00;--ab:#fef3c7;--r:#b42318;--rb:#fee4e2;--sh:0 1px 2px rgba(15,27,39,.06),0 8px 24px rgba(15,27,39,.06);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b1219;--card:#131d27;--tx:#e8eff5;--mu:#93a6b8;--bd:#243342;--ac:#38bdf8;--ac2:#2dd4bf;--g:#4ade80;--gb:#12351f;--a:#fbbf24;--ab:#3a2c0a;--r:#ff8a7a;--rb:#3d1814;--sh:0 8px 24px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0b1219;--card:#131d27;--tx:#e8eff5;--mu:#93a6b8;--bd:#243342;--ac:#38bdf8;--ac2:#2dd4bf;--g:#4ade80;--gb:#12351f;--a:#fbbf24;--ab:#3a2c0a;--r:#ff8a7a;--rb:#3d1814;--sh:0 8px 24px rgba(0,0,0,.35);color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.top{background:linear-gradient(120deg,#0b4f63,#0e7490 55%,#14b8a6);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center}
+.top h1{margin:0;font-size:22px;letter-spacing:.2px}.top p{margin:0;font-size:13px;opacity:.9}
+.top .sp{flex:1}.btn{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;transition:.15s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh)}.btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.btn.p{background:linear-gradient(120deg,var(--ac),var(--ac2));color:#06222b;border:0;font-weight:600}
+.ghost{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.35)}
+main{max-width:1180px;margin:0 auto;padding:22px 18px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;box-shadow:var(--sh);margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu)}
+.sec{margin-top:14px}.sec h3{font-size:13px;margin:0 0 8px;color:var(--ac);font-weight:700}
+.row{display:grid;grid-template-columns:1fr;gap:3px;margin-bottom:10px}
+.row label{font-size:13px;color:var(--mu);display:flex;justify-content:space-between;gap:8px}
+.row label b{color:var(--tx)}.mod{font-size:11px;background:var(--ab);color:var(--a);padding:1px 7px;border-radius:99px;margin-left:6px}
+input[type=range]{width:100%;accent-color:var(--ac)}
+select,input[type=text]{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sticky{position:sticky;top:12px}
+.gwrap{position:relative;max-width:300px;margin:6px auto 0}.gwrap svg{width:100%}
+.gnum{position:absolute;left:0;right:0;bottom:2px;text-align:center}
+.gnum b{font-size:44px;line-height:1;display:block}.gnum span{font-size:12px;color:var(--mu)}
+.badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:8px 0 4px}
+.tier{padding:5px 14px;border-radius:99px;font-weight:700;font-size:14px;display:inline-flex;gap:6px;align-items:center}
+.LOW{color:var(--g)}.MEDIUM{color:var(--a)}.HIGH{color:var(--r)}
+.tier.LOW{background:var(--gb)}.tier.MEDIUM{background:var(--ab)}.tier.HIGH{background:var(--rb)}
+.chip{padding:5px 12px;border-radius:99px;background:var(--bg);border:1px solid var(--bd);font-size:13px}
+.fx{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center;font-size:13px;margin:7px 0}
+.tr{position:relative;height:12px;background:var(--bg);border-radius:6px;border:1px solid var(--bd)}
+.tr::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--mu);opacity:.5}
+.tr i{position:absolute;top:0;bottom:0;border-radius:6px;transition:width .4s}
+.ag{display:grid;grid-template-columns:130px 1fr 48px;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.ag .tr{height:8px}.ag .tr::after{display:none}.ag .tr i{left:0;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.cf{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--bd);border-radius:12px;padding:12px;margin-top:10px;flex-wrap:wrap}
+.cf b{color:var(--g)}.mu{color:var(--mu);font-size:12.5px}
+.sk{height:16px;border-radius:8px;background:linear-gradient(90deg,var(--bd),var(--bg),var(--bd));background-size:200% 100%;animation:sh 1.2s infinite;margin:10px 0}
+@keyframes sh{to{background-position:-200% 0}}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--r);color:#fff;padding:10px 16px;border-radius:10px;transition:.3s;max-width:90%;z-index:9}
+#toast.on{transform:translateX(-50%) translateY(0)}
+footer{text-align:center;color:var(--mu);font-size:12px;padding:0 18px 28px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<header class="top"><div class="logo" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M20 4v5h-5"/><path d="M8 12h2l1.5-3 2 6L15 12h1"/></svg></div>
+<div><h1>CareLoop</h1><p>Explainable 30-day readmission risk · closing the loop between discharge and recovery</p></div><div class="sp"></div>
+<button class="btn ghost" id="lo">Sample: lower risk</button><button class="btn ghost" id="hi">Sample: higher risk</button><button class="btn ghost" id="th" aria-label="Toggle theme">◐ Theme</button></header>
+<main>
+<section><div class="card"><h2>Patient details</h2><p class="mu">Move any slider — the risk updates live. Items tagged <span class="mod">modifiable</span> are the ones a care team can influence.</p><div id="form"></div></div></section>
+<section><div class="sticky">
+<div class="card" aria-live="polite"><h2>30-day readmission risk</h2><div id="res"><div class="sk"></div><div class="sk" style="width:60%"></div><div class="sk"></div></div></div>
+<div class="card"><h2>What could lower it?</h2><p class="mu">Searches only modifiable factors. Associational, not causal.</p>
+<button class="btn p" id="sug" style="margin-top:8px">Suggest changes</button><div id="cf"></div></div></div></section>
+</main>
+<footer>Decision support only. Not a diagnostic tool; never replaces clinical judgement. Trained on 1999–2008 data from diabetic patients, so it may not generalise to other populations.</footer>
+<div id="toast" role="alert"></div>
+<script>
+const AGES=["[0-10)","[10-20)","[20-30)","[30-40)","[40-50)","[50-60)","[60-70)","[70-80)","[80-90)","[90-100)"];
+const G=[{t:"Patient",f:[{k:"age",l:"Age group",s:AGES},{k:"gender",l:"Gender",s:["Female","Male"]},{k:"race",l:"Race",s:["Caucasian","AfricanAmerican","Hispanic","Asian","Other"]}]},
+{t:"This hospital stay",f:[{k:"time_in_hospital",l:"Days in hospital",r:[1,14],m:1},{k:"num_lab_procedures",l:"Lab procedures",r:[1,130],m:1},{k:"num_procedures",l:"Procedures",r:[0,6]},{k:"num_medications",l:"Medications",r:[1,80],m:1},{k:"number_diagnoses",l:"Diagnoses on record",r:[1,16]},{k:"discharge_disposition_id",l:"Discharged to",s:[[1,"Home"],[3,"Skilled nursing facility"],[6,"Home with health service"],[2,"Short-term hospital"],[5,"Other facility"]],m:1}]},
+{t:"Previous year",f:[{k:"number_inpatient",l:"Inpatient visits",r:[0,10]},{k:"number_emergency",l:"Emergency visits",r:[0,10]},{k:"number_outpatient",l:"Outpatient visits",r:[0,15]}]},
+{t:"Clinical",f:[{k:"diag_1",l:"Primary diagnosis (ICD-9)",x:1},{k:"diag_2",l:"Secondary diagnosis",x:1},{k:"diag_3",l:"Additional diagnosis",x:1},{k:"insulin",l:"Insulin",s:["No","Steady","Up","Down"]}]}];
+const LOW={age:"[40-50)",gender:"Female",race:"Caucasian",time_in_hospital:2,num_lab_procedures:30,num_procedures:0,num_medications:8,number_diagnoses:4,discharge_disposition_id:1,number_inpatient:0,number_emergency:0,number_outpatient:1,diag_1:"250.00",diag_2:"401",diag_3:"272",insulin:"No"};
+const HI={age:"[70-80)",gender:"Male",race:"Caucasian",time_in_hospital:9,num_lab_procedures:62,num_procedures:3,num_medications:28,number_diagnoses:9,discharge_disposition_id:3,number_inpatient:3,number_emergency:2,number_outpatient:0,diag_1:"428",diag_2:"250.02",diag_3:"585",insulin:"Up"};
+const NICE={num_medications:"Medications",time_in_hospital:"Days in hospital",num_lab_procedures:"Lab procedures",number_inpatient:"Prior inpatient visits",number_emergency:"Prior emergency visits",number_outpatient:"Prior outpatient visits",number_diagnoses:"Diagnoses",n_meds_active:"Active diabetes meds",n_med_changes:"Medication changes",age_num:"Age",prior_visits:"Total prior visits",diag_1_grp:"Primary diagnosis group",diag_2_grp:"Secondary diagnosis group",diag_3_grp:"Additional diagnosis group",discharge_disposition_id:"Discharge destination",admission_type_id:"Admission type",admission_source_id:"Admission source",medical_specialty:"Specialty",lab_intensity:"Lab intensity",meds_per_day:"Meds per day",emergency_admit:"Emergency admission",high_utilizer:"Frequent utilizer",insulin:"Insulin",change:"Medication change",diabetesMed:"On diabetes meds",A1Cresult:"A1C result",max_glu_serum:"Glucose serum",race:"Race",gender:"Gender"};
+const nice=k=>NICE[k]||k.replace(/_/g," ");
+const $=id=>document.getElementById(id),pc=x=>(x*100).toFixed(1)+"%",ICON={LOW:"●",MEDIUM:"▲",HIGH:"■"};
+let P={...LOW,age:"[60-70)",time_in_hospital:5,num_lab_procedures:42,num_procedures:1,num_medications:16,number_diagnoses:8,number_inpatient:1,diag_1:"428",diag_2:"250.01",diag_3:"401"},base=null,last=null,seq=0,timer;
+function build(){$("form").innerHTML=G.map(g=>`<div class="sec"><h3>${g.t}</h3><div class="${g.f.every(f=>f.s||f.x)&&g.f.length>2?"two":""}">${g.f.map(f=>`<div class="row"><label for="f_${f.k}">${f.l}${f.m?'<span class="mod">modifiable</span>':""}${f.r?`<b id="o_${f.k}"></b>`:""}</label>${
+f.r?`<input type="range" id="f_${f.k}" data-k="${f.k}" min="${f.r[0]}" max="${f.r[1]}">`:f.s?`<select id="f_${f.k}" data-k="${f.k}">${f.s.map(o=>Array.isArray(o)?`<option value="${o[0]}">${o[1]}</option>`:`<option>${o}</option>`).join("")}</select>`:`<input type="text" id="f_${f.k}" data-k="${f.k}">`}</div>`).join("")}</div></div>`).join("");sync()}
+function sync(){G.forEach(g=>g.f.forEach(f=>{$("f_"+f.k).value=P[f.k];if(f.r)$("o_"+f.k).textContent=P[f.k]}))}
+$("form").addEventListener("input",e=>{const k=e.target.dataset.k;if(!k)return;let v=e.target.value;if(k.endsWith("_id")||e.target.type==="range"){v=+v;if(e.target.type==="range")$("o_"+k).textContent=v}P[k]=v;clearTimeout(timer);timer=setTimeout(score,300)});
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),4000)}
+async function api(ep,body){const r=await fetch(ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw new Error(typeof d.detail==="string"?d.detail:"Request failed ("+r.status+")");return d}
+async function score(){const my=++seq;try{const d=await api("/predict",P);if(my!==seq)return;last=d;if(base===null)base=d.risk;draw(d)}catch(e){toast("Could not score: "+e.message)}}
+function draw(d){const pct=Math.min(d.risk/.5,1)*100,mx=Math.max(...d.factors.map(f=>Math.abs(f.effect)),.01),delta=d.risk-base,mp=Object.entries(d.model_probs);
+const arc='<path d="M20 100 A80 80 0 0 1 180 100" pathLength="100" fill="none" stroke-width="16" stroke-linecap="round"';
+$("res").innerHTML=`<div class="gwrap"><svg viewBox="0 0 200 110" aria-hidden="true">${arc} stroke="var(--bd)"/>${arc} class="${d.tier}" stroke="currentColor" stroke-dasharray="${pct} 100" style="transition:stroke-dasharray .5s"/></svg><div class="gnum ${d.tier}"><b>${pc(d.risk)}</b><span>chance of readmission in 30 days</span></div></div>
+<div class="badges"><span class="tier ${d.tier}">${ICON[d.tier]} ${d.tier} RISK</span><span class="chip">${(d.risk/d.base_rate).toFixed(1)}× population average (${pc(d.base_rate)})</span>${Math.abs(delta)>=.0005?`<span class="chip ${delta<0?"LOW":"HIGH"}">${delta<0?"▼":"▲"} ${Math.abs(delta*100).toFixed(1)} pts vs baseline</span>`:""}<button class="btn" id="rb" style="padding:4px 10px;font-size:12px">Reset baseline</button></div>
+<div class="sec"><h3>Why this score</h3>${d.factors.map(f=>{const w=Math.abs(f.effect)/mx*50,up=f.effect>0;return`<div class="fx"><span>${nice(f.feature)}</span><div class="tr" role="img" aria-label="${nice(f.feature)} ${f.direction}"><i style="${up?"left":"right"}:50%;width:${w}%;background:var(${up?"--r":"--g"})"></i></div><span class="${up?"HIGH":"LOW"}">${up?"▲ raises":"▼ lowers"}</span></div>`}).join("")}</div>
+<div class="sec"><h3>Model agreement</h3>${mp.map(([n,v])=>`<div class="ag"><span>${n.replace(/_/g," ")}</span><div class="tr"><i style="width:${Math.min(v/.6,1)*100}%"></i></div><span>${pc(v)}</span></div>`).join("")}<p class="mu">Raw outputs of the three models; the headline number is their calibrated average.</p></div>`;
+$("rb").onclick=()=>{base=d.risk;draw(d)}}
+$("sug").onclick=async()=>{const c=$("cf");c.innerHTML='<div class="sk"></div><div class="sk"></div>';try{const d=await api("/counterfactual",P);
+c.innerHTML=d.suggestions.length?d.suggestions.map((s,i)=>`<div class="cf"><div>Change <b style="color:var(--tx)">${nice(s.feature)}</b> from ${s.from} to <b>${s.to}</b><div class="mu">Risk ${pc(s.old_risk)} → <b>${pc(s.new_risk)}</b></div></div><button class="btn p" data-i="${i}">Apply</button></div>`).join("")+`<p class="mu">${d.note}</p>`:'<p class="mu">No single modifiable change lowers the predicted risk.</p>';
+c.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const s=d.suggestions[b.dataset.i];P[s.feature]=s.to;sync();score();$("sug").click()})}catch(e){c.innerHTML="";toast("Could not get suggestions: "+e.message)}};
+const load=s=>{P={...s};base=null;sync();score();$("cf").innerHTML=""};
+$("lo").onclick=()=>load(LOW);$("hi").onclick=()=>load(HI);
+$("th").onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=d?"light":"dark"};
+build();score();
+</script></body></html>
